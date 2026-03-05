@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>E-Waste AI Classifier</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            font-family: Arial;
+        }
+
+        .container {
+            margin-top: 100px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #00c853;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #009624;
+        }
+
+        input {
+            margin: 20px;
+        }
+
+        img {
+            margin-top: 20px;
+            max-width: 300px;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>♻️ E-Waste Classification System</h1>
+
+    <input type="file" id="imageInput">
+    <br>
+    <button onclick="predict()">Predict</button>
+{% if result %}
+<hr>
+<h2>Prediction Result</h2>
+<p><strong>Class:</strong> {{ result }}</p>
+<p><strong>Confidence:</strong> {{ confidence }}%</p>
+<p><strong>Inference Time:</strong> {{ inference_time }} ms</p>
+
+<h3>Class Probabilities:</h3>
+{% for label, prob in probabilities.items() %}
+<div style="margin-bottom:10px;">
+    <span>{{ label }} ({{ prob }}%)</span>
+    <div style="background:#444; width:100%; height:20px;">
+        <div style="background:#00cc66; width:{{ prob }}%; height:20px;"></div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+
+    <br>
+    <img id="preview">
+
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+async function predict() {
+    const fileInput = document.getElementById("imageInput");
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Please select an image.");
+        return;
+    }
+
+    document.getElementById("preview").src = URL.createObjectURL(file);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/predict", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+
+    document.getElementById("result").innerHTML =
+        "Prediction: " + data.prediction +
+        "<br>Confidence: " + data.confidence + "%";
+}
+</script>
+
+</body>
+</html>
